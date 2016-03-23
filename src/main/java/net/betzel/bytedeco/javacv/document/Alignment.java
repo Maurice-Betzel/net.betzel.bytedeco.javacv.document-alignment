@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.*;
 import static org.bytedeco.javacpp.opencv_imgproc.minAreaRect;
 
@@ -124,7 +125,8 @@ public class Alignment {
                 //cvtColor(patch, patch, COLOR_BGR2GRAY);
                 Rect roi = new Rect(10, 10, patch.cols(), patch.rows());
                 Mat mask = matrix.apply(roi);
-                patch.copyTo(matrix, mask);
+                patch.copyTo(mask);
+                imwrite("result.png", matrix);
                 showMatrix("Result", matrix);
             }
         }
