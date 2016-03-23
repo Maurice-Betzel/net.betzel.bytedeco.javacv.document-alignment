@@ -22,6 +22,10 @@ package net.betzel.bytedeco.javacv.document;
  * limitations under the License.
  */
 
+import org.bytedeco.javacpp.indexer.FloatArrayIndexer;
+import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.javacpp.indexer.Indexer;
+import org.bytedeco.javacpp.indexer.IntIndexer;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
@@ -29,6 +33,8 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_imgproc.*;
@@ -91,9 +97,10 @@ public class Alignment {
                 double epsilon = 0.02 * arcLength(contours.get(i), true);
                 Mat approx = new Mat();
                 approxPolyDP(contours.get(i), approx, epsilon, true);
-                //MatVector matVector = new MatVector(approx.ar);
+                MatVector matVector = toPoint2fArray(approx);
 
-                //polylines(bgr, matVector, true, new Scalar(255, 0, 255, 0));
+                //Point2f approx2f = new Point2f(approx.data());
+                polylines(bgr, matVector, true, new Scalar(255, 0, 255, 0));
             }
         }
         showMatrix("Contours", bgr);
@@ -103,6 +110,21 @@ public class Alignment {
         //showMatrix(gray);
     }
 
+    private MatVector toPoint2fArray(Mat matrix) {
+        if(matrix.checkVector(2) < 0 ) {
+            throw new IllegalArgumentException("Expecting a vector Mat");
+        }
+        IntIndexer indexer = matrix.createIndexer();
+        int size = (int) matrix.total();
+        List<Point2f> list = new ArrayList(size);
+        MatVector matVector = new MatVector(size);
+        for (int i = 0; i < size; i++) {
+            list.add(new Point2f(indexer.get(0, i, 0), indexer.get(0, i, 1)));
+            matVector.put(i, new Mat(new Point2f(indexer.get(0, i, 0), indexer.get(0, i, 1))));
+        }
+        return matVector;
+    }
+
 
     private void showMatrix(String title, Mat matrix) {
         CanvasFrame canvas = new CanvasFrame(title, 1);
@@ -110,6 +132,15 @@ public class Alignment {
         canvas.setCanvasSize(matrix.size().width(), matrix.size().height());
         OpenCVFrameConverter converter = new OpenCVFrameConverter.ToIplImage();
         canvas.showImage(converter.convert(matrix));
+    }
+
+    public static void printMat(Mat mat) {
+        System.out.println("Channels: " + mat.channels());
+        System.out.println("Rows: " + mat.rows());
+        System.out.println("Cols: " + mat.cols());
+        System.out.println("Type: " + mat.type());
+        System.out.println("Dims: " + mat.dims());
+        System.out.println("Depth: " + mat.depth());
     }
 
 }
