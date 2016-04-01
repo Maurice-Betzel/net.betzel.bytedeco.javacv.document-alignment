@@ -1,4 +1,4 @@
-# Principal Component Analysis (PCA) with JavaCV
+# Document alignment with JavaCV
 
 License
 
